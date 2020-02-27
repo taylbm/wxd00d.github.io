@@ -1,0 +1,23 @@
+<!doctype html>
+<html>
+    <head>
+        <title>Tiny Living Temperatures</title>
+        <link rel="stylesheet" type="text/css" href="semantic/semantic.min.css">
+        <script
+          src="https://code.jquery.com/jquery-3.1.1.min.js"
+          integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
+          crossorigin="anonymous"></script>
+        <script src="semantic/semantic.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js"></script>
+    </head>
+    <body>
+        <h1 class="ui header">Real-Time Tiny Living Mini-Split Temperatures</h1>
+        <div class="chart-container" style="position: relative; height:40vh; width:80vw">
+          <canvas id="temperatureChart"></canvas>
+        </div>
+        <script src="https://sdk.amazonaws.com/js/aws-sdk-2.627.0.min.js"></script>
+        <script src="js/script.js"></script>
+    </body>
+</html>
+
