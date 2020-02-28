@@ -1,7 +1,24 @@
-var temperatureData = {
-  'indoor_temp': [],
-  'outdoor_temp': [],
-  'target_temp': []
+var TINY_LIVING = {
+  now: new Date(),
+  temperatureData: {
+    'indoor_temp': [],
+    'outdoor_temp': [],
+    'target_temp': []
+  }
+}
+
+function generate_date_range(first) {
+  var now = first ? TINY_LIVING.now : new Date()
+  var beginDate = first ? new Date() : TINY_LIVING.now
+  if (first) {
+    beginDate.setHours(0)
+    beginDate.setMinutes(0)
+  }
+  var isoDate = now.toISOString().split('T')[0]
+  return {'now': now.getTime().toString(), 
+          'beginDate': beginDate.getTime().toString(),
+          'isoDate': isoDate
+  }
 }
 
 function initialize_aws_credentials() {
@@ -17,31 +34,39 @@ function c_to_f(c_value){
   return (c_value_num * 9/5) + 32
 }
 
-function query_dynamo_db() {
+function query_dynamo_db(first) {
+  $('#loader').addClass('active')
   var ddb = new AWS.DynamoDB({apiVersion: '2012-08-10'});
+  dates = generate_date_range(first)
   var params = {
     ExpressionAttributeValues: {
-     ':ge': {N: '1'}
+      ':da': {S: dates['isoDate']},
+      ':ge': {S: dates['beginDate']},
+      ':le': {S: dates['now']}
     },
-    FilterExpression: 'target_temp > :ge',
-    TableName: 'tiny-living-mini-split-temperature'
+    KeyConditionExpression: 'collection_date = :da AND collection_timestamp BETWEEN :ge AND :le',
+    TableName: 'tiny-living-mini-split'
   };
-  ddb.scan(params, function(err, data) {
+  ddb.query(params, function(err, data) {
     if (err) {
       console.log("Error", err);
     } 
     else {
       data.Items.forEach(function(element, index, array) {
-        temperatureData['indoor_temp'].push({'x': new Date(parseFloat(element.timestamp.N, 10) * 1e3), 'y': c_to_f(element.indoor_temp.N)})
-        temperatureData['outdoor_temp'].push({'x': new Date(parseFloat(element.timestamp.N, 10) * 1e3), 'y': c_to_f(element.outdoor_temp.N)})
-        temperatureData['target_temp'].push({'x': new Date(parseFloat(element.timestamp.N, 10) * 1e3), 'y': c_to_f(element.target_temp.N)})
+        TINY_LIVING.temperatureData['indoor_temp'].push({'x': new Date(parseFloat(element.collection_timestamp.S, 10) * 1e3), 'y': c_to_f(element.indoor_temp.N)})
+        TINY_LIVING.temperatureData['outdoor_temp'].push({'x': new Date(parseFloat(element.collection_timestamp.S, 10) * 1e3), 'y': c_to_f(element.outdoor_temp.N)})
+        TINY_LIVING.temperatureData['target_temp'].push({'x': new Date(parseFloat(element.collection_timestamp.S, 10) * 1e3), 'y': c_to_f(element.target_temp.N)})
       });
-      console.log(temperatureData)
-      temperatureChart.data.datasets[0].data = temperatureData['indoor_temp']
-      temperatureChart.data.datasets[1].data = temperatureData['outdoor_temp']
-      temperatureChart.data.datasets[2].data = temperatureData['target_temp']
+      console.log(TINY_LIVING.temperatureData)
+      temperatureChart.data.datasets[0].data = TINY_LIVING.temperatureData['indoor_temp']
+      temperatureChart.data.datasets[1].data = TINY_LIVING.temperatureData['outdoor_temp']
+      temperatureChart.data.datasets[2].data = TINY_LIVING.temperatureData['target_temp']
+      console.log(data.Items)
+      temperatureChart.options.title.text = new Date().toDateString()
       temperatureChart.update()
     }
+    $('#loader').addClass('disabled')
+    $('#loader').removeClass('active')
   });
 }
 ctx = $('#temperatureChart')
@@ -77,10 +102,17 @@ var temperatureChart = new Chart(ctx, {
             unit: 'hour',
           }
       }]
+    },
+    title: {
+      display: true,
+      text: ''
     }
   }
 });
 $(document).ready(function() {
   initialize_aws_credentials()
-  query_dynamo_db()
+  query_dynamo_db(true)
+  $('#refresh-button').on("click", function() {
+    query_dynamo_db(false)
+  });
 });

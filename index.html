@@ -13,8 +13,14 @@
     </head>
     <body>
         <h1 class="ui header">Real-Time Tiny Living Mini-Split Temperatures</h1>
+        <button id="refresh-button" class="ui labeled icon button">
+          <i class="sync icon"></i>
+          Refresh
+        </button>
         <div class="chart-container" style="position: relative; height:40vh; width:80vw">
+          <div id="loader" style="top: 50%" class="ui disabled centered inline loader"></div>
           <canvas id="temperatureChart"></canvas>
+        </div>
         </div>
         <script src="https://sdk.amazonaws.com/js/aws-sdk-2.627.0.min.js"></script>
         <script src="js/script.js"></script>
