@@ -11,9 +11,9 @@ function generate_date_range(first) {
   var now = first ? TINY_LIVING.now : new Date()
   var beginDate = first ? new Date() : TINY_LIVING.now
   if (first) {
-    beginDate.setHours(0)
-    beginDate.setMinutes(0)
+    beginDate.setDate(beginDate.getDate() -1)
   }
+  console.log(beginDate)
   var isoDate = now.toISOString().split('T')[0]
   return {'now': now.getTime().toString(), 
           'beginDate': beginDate.getTime().toString(),
