@@ -79,18 +79,22 @@ var temperatureChart = new Chart(ctx, {
           label: 'Indoor Temperature',
           data: [{}],
           backgroundColor: Chart.helpers.color('#4dc9f6').alpha(0.6).rgbString(),
+          borderColor: 'white',
+          borderWidth: 0.25
       },
       {
           label: 'Outdoor Temperature',
           data: [{}],
           backgroundColor: Chart.helpers.color('#ff0000').alpha(1).rgbString(),
-          borderColor: 'black'
+          borderColor: 'white',
+          borderWidth: 0.25
       },
       {
           label: 'Target Temperature',
           data: [{}],
           backgroundColor: Chart.helpers.color('#7fff00').alpha(1).rgbString(),
-          borderColor: 'black'
+          borderColor: 'white',
+          borderWidth: 0.25
       }
     ]
   },
