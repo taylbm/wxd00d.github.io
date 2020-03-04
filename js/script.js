@@ -155,7 +155,8 @@ var temperatureChart = new Chart(ctx, {
           backgroundColor: Chart.helpers.color('#ff7400').alpha(1).rgbString(),
           borderColor: 'white',
           borderWidth: 0.25,
-          yAxisID: 'solarRadiation'
+          yAxisID: 'solarRadiation',
+	  type: 'line'
 
       }
     ]
@@ -173,12 +174,15 @@ var temperatureChart = new Chart(ctx, {
 	display: true,
 	position: 'left',
 	id: 'temperature',
+	labelString: 'Temperature (F)'
       }, 
       {
         type: 'linear',
 	display: true,
 	position: 'right',
-	id: 'solarRadiation'
+	id: 'solarRadiation',
+	labelString: 'Solar Radiation (W/m^2)'
+
       }]
     },
     title: {
@@ -192,6 +196,7 @@ $(document).ready(function() {
   query_minisplit_table(true)
   query_mesonet_table(true)
   $('#refresh-button').on("click", function() {
-    query_dynamo_db(false)
+    query_minisplit_table(false)
+    query_mesonet_table(false)
   });
 });
