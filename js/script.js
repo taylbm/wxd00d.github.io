@@ -1,9 +1,13 @@
 var TINY_LIVING = {
   now: new Date(),
-  temperatureData: {
+  minisplitData: {
     'indoor_temp': [],
     'outdoor_temp': [],
-    'target_temp': []
+    'target_temp': [],
+  },
+  mesonetData: {
+    'air_temperature': [],
+    'solar_radiation': []
   }
 }
 
@@ -34,7 +38,7 @@ function c_to_f(c_value){
   return (c_value_num * 9/5) + 32
 }
 
-function query_dynamo_db(first) {
+function query_minisplit_table(first) {
   $('#loader').addClass('active')
   var ddb = new AWS.DynamoDB({apiVersion: '2012-08-10'});
   dates = generate_date_range(first)
@@ -53,15 +57,52 @@ function query_dynamo_db(first) {
     } 
     else {
       data.Items.forEach(function(element, index, array) {
-        TINY_LIVING.temperatureData['indoor_temp'].push({'x': new Date(parseFloat(element.collection_timestamp.S, 10) * 1e3), 'y': c_to_f(element.indoor_temp.N)})
-        TINY_LIVING.temperatureData['outdoor_temp'].push({'x': new Date(parseFloat(element.collection_timestamp.S, 10) * 1e3), 'y': c_to_f(element.outdoor_temp.N)})
-        TINY_LIVING.temperatureData['target_temp'].push({'x': new Date(parseFloat(element.collection_timestamp.S, 10) * 1e3), 'y': c_to_f(element.target_temp.N)})
+        TINY_LIVING.minisplitData['indoor_temp'].push({'x': new Date(parseFloat(element.collection_timestamp.S, 10) * 1e3), 
+                                                         'y': c_to_f(element.indoor_temp.N)})
+        TINY_LIVING.minisplitData['outdoor_temp'].push({'x': new Date(parseFloat(element.collection_timestamp.S, 10) * 1e3),
+                                                          'y': c_to_f(element.outdoor_temp.N)})
+        TINY_LIVING.minisplitData['target_temp'].push({'x': new Date(parseFloat(element.collection_timestamp.S, 10) * 1e3),
+                                                         'y': c_to_f(element.target_temp.N)})
       });
-      console.log(TINY_LIVING.temperatureData)
-      temperatureChart.data.datasets[0].data = TINY_LIVING.temperatureData['indoor_temp']
-      temperatureChart.data.datasets[1].data = TINY_LIVING.temperatureData['outdoor_temp']
-      temperatureChart.data.datasets[2].data = TINY_LIVING.temperatureData['target_temp']
-      console.log(data.Items)
+      console.log(TINY_LIVING.minisplitData)
+      temperatureChart.data.datasets[0].data = TINY_LIVING.minisplitData['indoor_temp']
+      temperatureChart.data.datasets[1].data = TINY_LIVING.minisplitData['outdoor_temp']
+      temperatureChart.data.datasets[2].data = TINY_LIVING.minisplitData['target_temp']
+      temperatureChart.options.title.text = new Date().toDateString()
+      temperatureChart.update()
+    }
+    $('#loader').addClass('disabled')
+    $('#loader').removeClass('active')
+  });
+}
+
+function query_mesonet_table(first) {
+  $('#loader').addClass('active')
+  var ddb = new AWS.DynamoDB({apiVersion: '2012-08-10'});
+  dates = generate_date_range(first)
+  var params = {
+    ExpressionAttributeValues: {
+      ':da': {S: dates['isoDate']},
+      ':ge': {S: dates['beginDate']},
+      ':le': {S: dates['now']}
+    },
+    KeyConditionExpression: 'collection_date = :da AND collection_timestamp BETWEEN :ge AND :le',
+    TableName: 'nrmn-mesonet-data'
+  };
+  ddb.query(params, function(err, data) {
+    if (err) {
+      console.log("Error", err);
+    } 
+    else {
+      data.Items.forEach(function(element, index, array) {
+        TINY_LIVING.mesonetData['air_temperature'].push({'x': new Date(parseFloat(element.collection_timestamp.S, 10) * 1e3), 
+                                                         'y': c_to_f(element.air_temperature.N)})
+        TINY_LIVING.mesonetData['solar_radiation'].push({'x': new Date(parseFloat(element.collection_timestamp.S, 10) * 1e3),
+                                                          'y': element.solar_radiation.N})
+      });
+      console.log(TINY_LIVING.mesonetData)
+      temperatureChart.data.datasets[3].data = TINY_LIVING.mesonetData['air_temperature']
+      temperatureChart.data.datasets[4].data = TINY_LIVING.mesonetData['solar_radiation']
       temperatureChart.options.title.text = new Date().toDateString()
       temperatureChart.update()
     }
@@ -80,21 +121,42 @@ var temperatureChart = new Chart(ctx, {
           data: [{}],
           backgroundColor: Chart.helpers.color('#4dc9f6').alpha(0.6).rgbString(),
           borderColor: 'white',
-          borderWidth: 0.25
+          borderWidth: 0.25,
+          yAxisID: 'temperature'
       },
       {
           label: 'Outdoor Temperature',
           data: [{}],
-          backgroundColor: Chart.helpers.color('#ff0000').alpha(1).rgbString(),
+          backgroundColor: Chart.helpers.color('#ff7f7f').alpha(1).rgbString(),
           borderColor: 'white',
-          borderWidth: 0.25
+          borderWidth: 0.25,
+          yAxisID: 'temperature'
       },
       {
           label: 'Target Temperature',
           data: [{}],
           backgroundColor: Chart.helpers.color('#7fff00').alpha(1).rgbString(),
           borderColor: 'white',
-          borderWidth: 0.25
+          borderWidth: 0.25,
+          yAxisID: 'temperature'
+
+      },
+      {
+          label: 'Air Temperature (NRMN)',
+          data: [{}],
+          backgroundColor: Chart.helpers.color('#ff0000').alpha(1).rgbString(),
+          borderColor: 'white',
+          borderWidth: 0.25,
+          yAxisID: 'temperature'
+      },
+      {
+          label: 'Solar Radiation',
+          data: [{}],
+          backgroundColor: Chart.helpers.color('#ff7400').alpha(1).rgbString(),
+          borderColor: 'white',
+          borderWidth: 0.25,
+          yAxisID: 'solarRadiation'
+
       }
     ]
   },
@@ -105,6 +167,18 @@ var temperatureChart = new Chart(ctx, {
           time: {
             unit: 'hour',
           }
+      }],
+      yAxes: [{
+        type: 'linear',
+	display: true,
+	position: 'left',
+	id: 'temperature',
+      }, 
+      {
+        type: 'linear',
+	display: true,
+	position: 'right',
+	id: 'solarRadiation'
       }]
     },
     title: {
@@ -115,7 +189,8 @@ var temperatureChart = new Chart(ctx, {
 });
 $(document).ready(function() {
   initialize_aws_credentials()
-  query_dynamo_db(true)
+  query_minisplit_table(true)
+  query_mesonet_table(true)
   $('#refresh-button').on("click", function() {
     query_dynamo_db(false)
   });
