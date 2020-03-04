@@ -190,7 +190,8 @@ var temperatureChart = new Chart(ctx, {
     },
     legend: {
       labels: {
-        fontColor: 'navajowhite'
+        fontColor: 'navajowhite',
+        fontSize: 14
       }
     },
     scales: {
@@ -200,7 +201,8 @@ var temperatureChart = new Chart(ctx, {
           unit: 'hour',
         },
         ticks: {
-          fontColor: 'navajowhite'
+          fontColor: 'navajowhite',
+          fontSize: 14
         }
       }],
       yAxes: [{
@@ -209,12 +211,13 @@ var temperatureChart = new Chart(ctx, {
 	position: 'left',
 	id: 'temperature',
         ticks: {
-          fontColor: 'navajowhite'
+          fontColor: 'navajowhite',
+          fontSize: 14
         },
         scaleLabel: {
           display: true,
           labelString: 'Temperature (deg F)',
-          fontSize: 14,
+          fontSize: 16,
           fontColor: 'navajowhite',
           fontFamily: 'sans-serif'
         }
@@ -230,7 +233,7 @@ var temperatureChart = new Chart(ctx, {
         scaleLabel: {
           display: true,
           labelString: 'Solar Radiation (W/m^2)',
-          fontSize: 14,
+          fontSize: 16,
           fontColor: 'navajowhite',
           fontFamily: 'sans-serif'
         }
@@ -239,7 +242,7 @@ var temperatureChart = new Chart(ctx, {
     title: {
       display: true,
       text: '',
-      fontSize: 16,
+      fontSize: 18,
       fontColor: 'navajowhite',
     }
   }
