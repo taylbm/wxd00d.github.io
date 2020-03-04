@@ -11,15 +11,16 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js"></script>
     </head>
-    <body style="background-color:black">
-        <button id="refresh-button" class="ui labeled icon button">
-          <i class="sync icon"></i>
-          Refresh
-        </button>
-        <div class="chart-container" style="position: relative; height:60vh; width:90vw; margin:3%;">
-          <div id="loader" style="top: 50%" class="ui disabled centered inline loader"></div>
-          <canvas id="temperatureChart"></canvas>
-        </div>
+    <body>
+        <div style="background-color:black; height:80vh; width:80vw; margin:1%;" class="main-container">
+          <button id="refresh-button" class="ui labeled icon button">
+            <i class="sync icon"></i>
+            Refresh
+          </button>
+          <div class="chart-container" style="position: relative; height:60%; width:95%; margin:2%;">
+            <div id="loader" style="top: 50%" class="ui disabled centered inline loader"></div>
+            <canvas id="temperatureChart"></canvas>
+          </div>
         </div>
         <script src="https://sdk.amazonaws.com/js/aws-sdk-2.627.0.min.js"></script>
         <script src="js/script.js"></script>
