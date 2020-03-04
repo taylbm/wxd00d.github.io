@@ -160,6 +160,14 @@ var temperatureChart = new Chart(ctx, {
     ]
   },
   options: {
+    plugins: {
+      zoom: {
+        zoom: {
+          enabled: true,
+          drag: true
+        }
+      }
+    },
     scales: {
       xAxes: [{
         type: 'time',
@@ -209,6 +217,9 @@ $(document).ready(function() {
   $('#refresh-button').on("click", function() {
     query_minisplit_table(false)
     query_mesonet_table(false)
+  });
+  $('#reset-button').on("click", function() {
+    temperatureChart.resetZoom()
   });
   $('#temperatureChart').css("border", "1px solid navajowhite")
   temperatureChart.options.title.text = [new Date().toDateString(), 'Real-Time Tiny Living Mini-Split Temperatures (TINY)', 'OK Mesonet Data from Norman (NRMN)']

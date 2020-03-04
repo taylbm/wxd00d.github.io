@@ -6,16 +6,23 @@
         <script
           src="https://code.jquery.com/jquery-3.1.1.min.js"
           integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
-          crossorigin="anonymous"></script>
+          crossorigin="anonymous">
+        </script>
         <script src="semantic/semantic.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@0.7.4"></script>
     </head>
     <body>
         <div style="background-color:black; height:80vh; width:80vw; margin:1%;" class="main-container">
           <button id="refresh-button" class="ui labeled icon button" style="margin:1%">
             <i class="sync icon"></i>
             Refresh
+          </button>
+          <button id="reset-button" class="ui labeled icon button" style="margin:1%">
+            <i class="undo icon"></i>
+            Reset Zoom
           </button>
           <div class="chart-container" style="position: relative; height:60%; width:95%; margin:2%;">
             <div id="loader" style="top: 50%" class="ui disabled centered inline loader"></div>
