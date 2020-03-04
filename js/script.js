@@ -11,7 +11,7 @@ var TINY_LIVING = {
   }
 }
 
-function generate_date_range(first) {
+function GenerateDateRange(first) {
   var now = first ? TINY_LIVING.now : new Date()
   var beginDate = first ? new Date() : TINY_LIVING.now
   if (first) {
@@ -25,7 +25,7 @@ function generate_date_range(first) {
   }
 }
 
-function initialize_aws_credentials() {
+function InitAWSCredentials() {
   // Initialize the Amazon Cognito credentials provider
   AWS.config.region = 'us-east-1'; // Region
   AWS.config.credentials = new AWS.CognitoIdentityCredentials({
@@ -33,15 +33,33 @@ function initialize_aws_credentials() {
   });
 }
 
-function c_to_f(c_value){
+function cToF(c_value){
   var c_value_num = parseFloat(c_value, 10)
   return (c_value_num * 9/5) + 32
 }
 
-function query_minisplit_table(first) {
+function updateTextData(temperatureChart, target) {
+  if (target == 'mesonet') {
+    var mesonetCollectionTime = 'Mesonet Data Collected at: ' + temperatureChart.data.datasets[3].data.slice(-1)[0]['x']
+    var latestAirTemp = 'Air Temp (deg F): ' + Math.round(temperatureChart.data.datasets[3].data.slice(-1)[0]['y'])
+    var latestSolarRadiation = ', Solar Radiation (W/m^2): ' + temperatureChart.data.datasets[4].data.slice(-1)[0]['y']
+    $('#latest-data-mesonet-time').html(latestAirTemp + latestSolarRadiation)
+    $('#latest-data-mesonet').html(mesonetCollectionTime)
+  }
+  else {
+    var minisplitCollectionTime = 'Mini Split Data Collected at: ' + temperatureChart.data.datasets[0].data.slice(-1)[0]['x']
+    var latestIndoorTemp = 'Indoor Temp (deg F): ' + temperatureChart.data.datasets[0].data.slice(-1)[0]['y']
+    var latestOutdoorTemp = ', Outdoor Temp (deg F): ' + temperatureChart.data.datasets[1].data.slice(-1)[0]['y']
+    var latestTargetTemp = ', Target Temp (deg F): ' + temperatureChart.data.datasets[2].data.slice(-1)[0]['y']
+    $('#latest-data-minisplit-time').html(minisplitCollectionTime)
+    $('#latest-data-minisplit').html(latestIndoorTemp + latestOutdoorTemp + latestTargetTemp)
+  }
+}
+
+function queryMinisplitTable(first) {
   $('#loader').addClass('active')
   var ddb = new AWS.DynamoDB({apiVersion: '2012-08-10'});
-  dates = generate_date_range(first)
+  dates = GenerateDateRange(first)
   var params = {
     ExpressionAttributeValues: {
       ':da': {S: dates['isoDate']},
@@ -58,27 +76,28 @@ function query_minisplit_table(first) {
     else {
       data.Items.forEach(function(element, index, array) {
         TINY_LIVING.minisplitData['indoor_temp'].push({'x': new Date(parseFloat(element.collection_timestamp.S, 10) * 1e3), 
-                                                         'y': c_to_f(element.indoor_temp.N)})
+                                                         'y': cToF(element.indoor_temp.N)})
         TINY_LIVING.minisplitData['outdoor_temp'].push({'x': new Date(parseFloat(element.collection_timestamp.S, 10) * 1e3),
-                                                          'y': c_to_f(element.outdoor_temp.N)})
+                                                          'y': cToF(element.outdoor_temp.N)})
         TINY_LIVING.minisplitData['target_temp'].push({'x': new Date(parseFloat(element.collection_timestamp.S, 10) * 1e3),
-                                                         'y': c_to_f(element.target_temp.N)})
+                                                         'y': cToF(element.target_temp.N)})
       });
       console.log(TINY_LIVING.minisplitData)
       temperatureChart.data.datasets[0].data = TINY_LIVING.minisplitData['indoor_temp']
       temperatureChart.data.datasets[1].data = TINY_LIVING.minisplitData['outdoor_temp']
       temperatureChart.data.datasets[2].data = TINY_LIVING.minisplitData['target_temp']
       temperatureChart.update()
+      updateTextData(temperatureChart, 'minisplit')
     }
     $('#loader').addClass('disabled')
     $('#loader').removeClass('active')
   });
 }
 
-function query_mesonet_table(first) {
+function queryMesonetTable(first) {
   $('#loader').addClass('active')
   var ddb = new AWS.DynamoDB({apiVersion: '2012-08-10'});
-  dates = generate_date_range(first)
+  dates = GenerateDateRange(first)
   var params = {
     ExpressionAttributeValues: {
       ':da': {S: dates['isoDate']},
@@ -95,7 +114,7 @@ function query_mesonet_table(first) {
     else {
       data.Items.forEach(function(element, index, array) {
         TINY_LIVING.mesonetData['air_temperature'].push({'x': new Date(parseFloat(element.collection_timestamp.S, 10) * 1e3), 
-                                                         'y': c_to_f(element.air_temperature.N)})
+                                                         'y': cToF(element.air_temperature.N)})
         TINY_LIVING.mesonetData['solar_radiation'].push({'x': new Date(parseFloat(element.collection_timestamp.S, 10) * 1e3),
                                                           'y': element.solar_radiation.N})
       });
@@ -103,6 +122,7 @@ function query_mesonet_table(first) {
       temperatureChart.data.datasets[3].data = TINY_LIVING.mesonetData['air_temperature']
       temperatureChart.data.datasets[4].data = TINY_LIVING.mesonetData['solar_radiation']
       temperatureChart.update()
+      updateTextData(temperatureChart, 'mesonet')
     }
     $('#loader').addClass('disabled')
     $('#loader').removeClass('active')
@@ -168,24 +188,35 @@ var temperatureChart = new Chart(ctx, {
         }
       }
     },
+    legend: {
+      labels: {
+        fontColor: 'navajowhite'
+      }
+    },
     scales: {
       xAxes: [{
         type: 'time',
-          time: {
-            unit: 'hour',
-          }
+        time: {
+          unit: 'hour',
+        },
+        ticks: {
+          fontColor: 'navajowhite'
+        }
       }],
       yAxes: [{
         type: 'linear',
 	display: true,
 	position: 'left',
 	id: 'temperature',
+        ticks: {
+          fontColor: 'navajowhite'
+        },
         scaleLabel: {
-            display: true,
-            labelString: 'Temperature (deg F)',
-            fontSize: 14,
-            fontColor: 'navajowhite',
-            fontFamily: 'sans-serif'
+          display: true,
+          labelString: 'Temperature (deg F)',
+          fontSize: 14,
+          fontColor: 'navajowhite',
+          fontFamily: 'sans-serif'
         }
       }, 
       {
@@ -193,12 +224,15 @@ var temperatureChart = new Chart(ctx, {
 	display: true,
 	position: 'right',
 	id: 'solarRadiation',
+        ticks: {
+          fontColor: 'navajowhite'
+        },
         scaleLabel: {
-            display: true,
-            labelString: 'Solar Radiation (W/m^2)',
-            fontSize: 14,
-            fontColor: 'navajowhite',
-            fontFamily: 'sans-serif'
+          display: true,
+          labelString: 'Solar Radiation (W/m^2)',
+          fontSize: 14,
+          fontColor: 'navajowhite',
+          fontFamily: 'sans-serif'
         }
       }]
     },
@@ -211,12 +245,12 @@ var temperatureChart = new Chart(ctx, {
   }
 });
 $(document).ready(function() {
-  initialize_aws_credentials()
-  query_minisplit_table(true)
-  query_mesonet_table(true)
+  InitAWSCredentials()
+  queryMinisplitTable(true)
+  queryMesonetTable(true)
   $('#refresh-button').on("click", function() {
-    query_minisplit_table(false)
-    query_mesonet_table(false)
+    queryMinisplitTable(false)
+    queryMesonetTable(false)
   });
   $('#reset-button').on("click", function() {
     temperatureChart.resetZoom()

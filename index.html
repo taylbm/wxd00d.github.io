@@ -16,7 +16,7 @@
         <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@0.7.4"></script>
     </head>
     <body>
-        <div style="background-color:black; height:80vh; width:80vw; margin:1%;" class="main-container">
+        <div style="background-color:black; margin:1%;" class="ui container">
           <button id="refresh-button" class="ui labeled icon button" style="margin:1%">
             <i class="sync icon"></i>
             Refresh
@@ -25,7 +25,11 @@
             <i class="undo icon"></i>
             Reset Zoom
           </button>
-          <div class="chart-container" style="position: relative; height:75%; width:95%; margin:2%;">
+          <p style="color:navajowhite; margin:2%;" id="latest-data-minisplit-time">N/A</p>
+          <p style="color:navajowhite; margin:2%;" id="latest-data-minisplit">N/A</p>
+          <p style="color:navajowhite; margin:2%;" id="latest-data-mesonet-time">N/A</p>
+          <p style="color:navajowhite; margin:2%;" id="latest-data-mesonet">N/A</p>
+          <div class="chart-container" style="position: relative; margin:2%; padding-bottom:10px;">
             <div id="loader" style="top: 50%" class="ui disabled centered inline loader"></div>
             <canvas id="temperatureChart"></canvas>
           </div>
