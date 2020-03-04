@@ -68,7 +68,6 @@ function query_minisplit_table(first) {
       temperatureChart.data.datasets[0].data = TINY_LIVING.minisplitData['indoor_temp']
       temperatureChart.data.datasets[1].data = TINY_LIVING.minisplitData['outdoor_temp']
       temperatureChart.data.datasets[2].data = TINY_LIVING.minisplitData['target_temp']
-      temperatureChart.options.title.text = new Date().toDateString()
       temperatureChart.update()
     }
     $('#loader').addClass('disabled')
@@ -103,7 +102,6 @@ function query_mesonet_table(first) {
       console.log(TINY_LIVING.mesonetData)
       temperatureChart.data.datasets[3].data = TINY_LIVING.mesonetData['air_temperature']
       temperatureChart.data.datasets[4].data = TINY_LIVING.mesonetData['solar_radiation']
-      temperatureChart.options.title.text = new Date().toDateString()
       temperatureChart.update()
     }
     $('#loader').addClass('disabled')
@@ -117,7 +115,7 @@ var temperatureChart = new Chart(ctx, {
     datasets:
     [
       {
-          label: 'Indoor Temperature',
+          label: 'Indoor Temperature (TINY)',
           data: [{}],
           backgroundColor: Chart.helpers.color('#4dc9f6').alpha(0.6).rgbString(),
           borderColor: 'white',
@@ -125,7 +123,7 @@ var temperatureChart = new Chart(ctx, {
           yAxisID: 'temperature'
       },
       {
-          label: 'Outdoor Temperature',
+          label: 'Outdoor Temperature (TINY)',
           data: [{}],
           backgroundColor: Chart.helpers.color('#ff7f7f').alpha(1).rgbString(),
           borderColor: 'white',
@@ -133,7 +131,7 @@ var temperatureChart = new Chart(ctx, {
           yAxisID: 'temperature'
       },
       {
-          label: 'Target Temperature',
+          label: 'Target Temperature (TINY)',
           data: [{}],
           backgroundColor: Chart.helpers.color('#7fff00').alpha(1).rgbString(),
           borderColor: 'white',
@@ -150,7 +148,7 @@ var temperatureChart = new Chart(ctx, {
           yAxisID: 'temperature'
       },
       {
-          label: 'Solar Radiation',
+          label: 'Solar Radiation (NRMN)',
           data: [{}],
           backgroundColor: Chart.helpers.color('#ff7400').alpha(1).rgbString(),
           borderColor: 'white',
@@ -174,20 +172,28 @@ var temperatureChart = new Chart(ctx, {
 	display: true,
 	position: 'left',
 	id: 'temperature',
-	labelString: 'Temperature (F)'
+        scaleLabel: {
+            display: true,
+            labelString: 'Temperature (deg F)',
+            fontSize: 14
+        }
       }, 
       {
         type: 'linear',
 	display: true,
 	position: 'right',
 	id: 'solarRadiation',
-	labelString: 'Solar Radiation (W/m^2)'
-
+        scaleLabel: {
+            display: true,
+            labelString: 'Solar Radiation (W/m^2)',
+            fontSize: 14
+        }
       }]
     },
     title: {
       display: true,
-      text: ''
+      text: '',
+      fontSize: 16
     }
   }
 });
@@ -199,4 +205,6 @@ $(document).ready(function() {
     query_minisplit_table(false)
     query_mesonet_table(false)
   });
+  $('#temperatureChart').css("border", "1px solid navajowhite")
+  temperatureChart.options.title.text = [new Date().toDateString(), 'Real-Time Tiny Living Mini-Split Temperatures (TINY)', 'OK Mesonet Data from Norman (NRMN)']
 });
