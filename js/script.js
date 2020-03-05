@@ -41,13 +41,18 @@ function cToF(c_value){
 }
 
 function updateTextData(temperatureChart, target) {
+  var totalDailySolarRadiation = 0
   if (target == 'mesonet') {
     var mesonetCollectionTime = temperatureChart.data.datasets[3].data.slice(-1)[0]['x']
     var latestAirTemp = Math.round(temperatureChart.data.datasets[3].data.slice(-1)[0]['y']) + String.fromCharCode(176) + ' F'
-    var latestSolarRadiation = temperatureChart.data.datasets[4].data.slice(-1)[0]['y'] +  'W/m^2'
+    var latestSolarRadiation = temperatureChart.data.datasets[4].data.slice(-1)[0]['y'] +  ' watts/meter^2'
+    for (instantaneousRadiation in temperatureChart.data.datasets[4].data) {
+      totalDailySolarRadiation += (instantaneousRadiation / 1e3) * (5/60)
+    }
     $('#mesonetCollectionTime').html(mesonetCollectionTime)
     $('#airTemp').html(latestAirTemp)
     $('#solarRadiation').html(latestSolarRadiation)
+    $('#totalDailySolarRadiation').html(Math.round(totalDailySolarRadiation * 100)/100 + ' kilowatt-Hours')
   }
   else {
     var minisplitCollectionTime = temperatureChart.data.datasets[0].data.slice(-1)[0]['x']
