@@ -54,12 +54,13 @@ function updateTextData(temperatureChart, target) {
     var latestIndoorTemp = temperatureChart.data.datasets[0].data.slice(-1)[0]['y'] + String.fromCharCode(176) + ' F'
     var latestOutdoorTemp = temperatureChart.data.datasets[1].data.slice(-1)[0]['y'] + String.fromCharCode(176) + ' F'
     var latestTargetTemp = temperatureChart.data.datasets[2].data.slice(-1)[0]['y'] + String.fromCharCode(176) + ' F'
-    var latestPowerState = TINY_LIVING.minisplitData['power_state'].slice(-1)[0] ? '<i class="icon checkmark"></i> On' : '<i class="icon close"></i> Off'
-    var powerStateIcon = TINY_LIVING.minisplitData['power_state'].slice(-1)[0] ? 'postive' : 'negative'
+    var powerState = TINY_LIVING.minisplitData['power_state'].slice(-1)[0].BOOL
+    var latestPowerState = powerState ? '<i class="icon checkmark"></i> On' : '<i class="icon close"></i> Off'
+    var powerStateIcon =  powerState ? 'postive' : 'negative'
     $('#minisplitCollectionTime').html(minisplitCollectionTime)
     $('#indoorTemp').html(latestIndoorTemp)
     $('#outdoorTemp').html(latestOutdoorTemp)
-    $('#targetTemp').html(latestTargetTemp)
+    $('#targetTemp').html(powerState ? latestTargetTemp : 'None' )
     $('#powerState').attr('class', powerStateIcon)
     $('#powerState').html(latestPowerState)
  
