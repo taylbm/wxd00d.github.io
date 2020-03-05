@@ -26,15 +26,40 @@
             <i class="undo icon"></i>
             Reset Zoom 
           </button>
-          <p style="color:navajowhite; display:inline-block"> (in chart area, pinch to zoom on mobile devices, click and drag on desktop)</p>
-          <p style="color:navajowhite; margin:2%;" id="latest-data-minisplit-time">N/A</p>
-          <p style="color:navajowhite; margin:2%;" id="latest-data-minisplit">N/A</p>
-          <p style="color:navajowhite; margin:2%;" id="latest-data-mesonet-time">N/A</p>
-          <p style="color:navajowhite; margin:2%;" id="latest-data-mesonet">N/A</p>
           <div class="chart-container" style="position: relative; margin:2%; padding-bottom:10px;">
             <div id="loader" style="top: 50%" class="ui disabled centered inline loader"></div>
             <canvas id="temperatureChart"></canvas>
           </div>
+          <table class="ui celled table">
+            <thead>
+              <tr><th>Latest Mini-Split Data</th>
+              <th id="minisplitCollectionTime"></th>
+              <th>Latest Mesonet Data</th>
+              <th id="mesonetCollectionTime"></th>
+            </tr></thead>
+            <tbody>
+              <tr>
+                <td>Indoor Temperature</td>
+                <td style="color:#4dc9f6; background:black" id="indoorTemp"></td>
+                <td>Air Temperature</td>
+                <td style="color:#ff0000; background:black" id="airTemp"></td>
+              </tr>
+              <tr>
+                <td>Outdoor Temperature</td>
+                <td style="color:#cc0066; background:black" id="outdoorTemp"></td>
+                <td>Solar Radiation</td>
+                <td style="color:#ff7400; background:black" id="solarRadiation"></td>
+              </tr>
+              <tr>
+                <td>Target Temperature</td>
+                <td style="color:#7fff00; background:black" id="targetTemp"></td>
+              </tr>
+              <tr>
+                <td>Power State</td>
+                <td class="negative" id="powerState"></td>
+              </tr>
+            </tbody>
+          </table>
         </div>
         <script src="https://sdk.amazonaws.com/js/aws-sdk-2.627.0.min.js"></script>
         <script src="js/script.js"></script>

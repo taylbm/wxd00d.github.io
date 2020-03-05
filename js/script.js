@@ -1,9 +1,11 @@
 var TINY_LIVING = {
+  DEFAULT_FONT_COLOR: 'navajowhite',
   now: new Date(),
   minisplitData: {
     'indoor_temp': [],
     'outdoor_temp': [],
     'target_temp': [],
+    'power_state': []
   },
   mesonetData: {
     'air_temperature': [],
@@ -25,7 +27,7 @@ function GenerateDateRange(first) {
   }
 }
 
-function InitAWSCredentials() {
+function initAWSCredentials() {
   // Initialize the Amazon Cognito credentials provider
   AWS.config.region = 'us-east-1'; // Region
   AWS.config.credentials = new AWS.CognitoIdentityCredentials({
@@ -40,19 +42,28 @@ function cToF(c_value){
 
 function updateTextData(temperatureChart, target) {
   if (target == 'mesonet') {
-    var mesonetCollectionTime = 'Mesonet Data Collected at: ' + temperatureChart.data.datasets[3].data.slice(-1)[0]['x']
-    var latestAirTemp = 'Air Temp (deg F): ' + Math.round(temperatureChart.data.datasets[3].data.slice(-1)[0]['y'])
-    var latestSolarRadiation = ', Solar Radiation (W/m^2): ' + temperatureChart.data.datasets[4].data.slice(-1)[0]['y']
-    $('#latest-data-mesonet-time').html(latestAirTemp + latestSolarRadiation)
-    $('#latest-data-mesonet').html(mesonetCollectionTime)
+    var mesonetCollectionTime = temperatureChart.data.datasets[3].data.slice(-1)[0]['x']
+    var latestAirTemp = Math.round(temperatureChart.data.datasets[3].data.slice(-1)[0]['y']) + String.fromCharCode(176) + ' F'
+    var latestSolarRadiation = temperatureChart.data.datasets[4].data.slice(-1)[0]['y'] +  'W/m^2'
+    $('#mesonetCollectionTime').html(mesonetCollectionTime)
+    $('#airTemp').html(latestAirTemp)
+    $('#solarRadiation').html(latestSolarRadiation)
   }
   else {
-    var minisplitCollectionTime = 'Mini Split Data Collected at: ' + temperatureChart.data.datasets[0].data.slice(-1)[0]['x']
-    var latestIndoorTemp = 'Indoor Temp (deg F): ' + temperatureChart.data.datasets[0].data.slice(-1)[0]['y']
-    var latestOutdoorTemp = ', Outdoor Temp (deg F): ' + temperatureChart.data.datasets[1].data.slice(-1)[0]['y']
-    var latestTargetTemp = ', Target Temp (deg F): ' + temperatureChart.data.datasets[2].data.slice(-1)[0]['y']
-    $('#latest-data-minisplit-time').html(minisplitCollectionTime)
-    $('#latest-data-minisplit').html(latestIndoorTemp + latestOutdoorTemp + latestTargetTemp)
+    var minisplitCollectionTime = temperatureChart.data.datasets[0].data.slice(-1)[0]['x']
+    var latestIndoorTemp = temperatureChart.data.datasets[0].data.slice(-1)[0]['y'] + String.fromCharCode(176) + ' F'
+    var latestOutdoorTemp = temperatureChart.data.datasets[1].data.slice(-1)[0]['y'] + String.fromCharCode(176) + ' F'
+    var latestTargetTemp = temperatureChart.data.datasets[2].data.slice(-1)[0]['y'] + String.fromCharCode(176) + ' F'
+    var latestPowerState = TINY_LIVING.minisplitData['power_state'].slice(-1)[0] ? '<i class="icon checkmark"></i> On' : '<i class="icon close"></i> Off'
+    var powerStateIcon = TINY_LIVING.minisplitData['power_state'].slice(-1)[0] ? 'postive' : 'negative'
+    $('#minisplitCollectionTime').html(minisplitCollectionTime)
+    $('#indoorTemp').html(latestIndoorTemp)
+    $('#outdoorTemp').html(latestOutdoorTemp)
+    $('#targetTemp').html(latestTargetTemp)
+    $('#powerState').attr('class', powerStateIcon)
+    $('#powerState').html(latestPowerState)
+ 
+
   }
 }
 
@@ -75,12 +86,17 @@ function queryMinisplitTable(first) {
     } 
     else {
       data.Items.forEach(function(element, index, array) {
-        TINY_LIVING.minisplitData['indoor_temp'].push({'x': new Date(parseFloat(element.collection_timestamp.S, 10) * 1e3), 
-                                                         'y': cToF(element.indoor_temp.N)})
+        TINY_LIVING.minisplitData['indoor_temp'].push({'x': new Date(parseFloat(element.collection_timestamp.S, 10) * 1e3),
+                                                       'y': cToF(element.indoor_temp.N)})
         TINY_LIVING.minisplitData['outdoor_temp'].push({'x': new Date(parseFloat(element.collection_timestamp.S, 10) * 1e3),
-                                                          'y': cToF(element.outdoor_temp.N)})
-        TINY_LIVING.minisplitData['target_temp'].push({'x': new Date(parseFloat(element.collection_timestamp.S, 10) * 1e3),
-                                                         'y': cToF(element.target_temp.N)})
+                                                        'y': cToF(element.outdoor_temp.N)})
+        if (element.hasOwnProperty('power_state')) {
+          TINY_LIVING.minisplitData['power_state'].push(element.power_state)
+          if (element.power_state.BOOL) { 
+            TINY_LIVING.minisplitData['target_temp'].push({'x': new Date(parseFloat(element.collection_timestamp.S, 10) * 1e3),
+                                                           'y': cToF(element.target_temp.N)})
+          }
+        }
       });
       console.log(TINY_LIVING.minisplitData)
       temperatureChart.data.datasets[0].data = TINY_LIVING.minisplitData['indoor_temp']
@@ -145,7 +161,7 @@ var temperatureChart = new Chart(ctx, {
       {
           label: 'Outdoor Temperature (TINY)',
           data: [{}],
-          backgroundColor: Chart.helpers.color('#ff7f7f').alpha(1).rgbString(),
+          backgroundColor: Chart.helpers.color('#cc0066').alpha(1).rgbString(),
           borderColor: 'white',
           borderWidth: 0.25,
           yAxisID: 'temperature'
@@ -154,8 +170,9 @@ var temperatureChart = new Chart(ctx, {
           label: 'Target Temperature (TINY)',
           data: [{}],
           backgroundColor: Chart.helpers.color('#7fff00').alpha(1).rgbString(),
-          borderColor: 'white',
-          borderWidth: 0.25,
+          borderColor: Chart.helpers.color('#7fff00').alpha(1).rgbString(),
+          borderWidth: 3,
+          pointStyle: 'line',
           yAxisID: 'temperature'
 
       },
@@ -174,7 +191,8 @@ var temperatureChart = new Chart(ctx, {
           borderColor: 'white',
           borderWidth: 0.25,
           yAxisID: 'solarRadiation',
-	  type: 'line'
+	  type: 'line',
+          pointStyle: 'rectRounded'
 
       }
     ]
@@ -184,14 +202,16 @@ var temperatureChart = new Chart(ctx, {
       zoom: {
         zoom: {
           enabled: true,
-          drag: true
-        }
+          drag: true,
+          mode: 'x'
+        },
       }
     },
     legend: {
       labels: {
-        fontColor: 'navajowhite',
-        fontSize: 14
+        fontColor: TINY_LIVING.DEFAULT_FONT_COLOR,
+        fontSize: 14,
+        usePointStyle: true
       }
     },
     scales: {
@@ -201,7 +221,7 @@ var temperatureChart = new Chart(ctx, {
           unit: 'hour',
         },
         ticks: {
-          fontColor: 'navajowhite',
+          fontColor: TINY_LIVING.DEFAULT_FONT_COLOR,
           fontSize: 14
         }
       }],
@@ -211,15 +231,14 @@ var temperatureChart = new Chart(ctx, {
 	position: 'left',
 	id: 'temperature',
         ticks: {
-          fontColor: 'navajowhite',
+          fontColor: TINY_LIVING.DEFAULT_FONT_COLOR,
           fontSize: 14
         },
         scaleLabel: {
           display: true,
           labelString: 'Temperature (deg F)',
           fontSize: 16,
-          fontColor: 'navajowhite',
-          fontFamily: 'sans-serif'
+          fontColor: TINY_LIVING.DEFAULT_FONT_COLOR
         }
       }, 
       {
@@ -228,14 +247,13 @@ var temperatureChart = new Chart(ctx, {
 	position: 'right',
 	id: 'solarRadiation',
         ticks: {
-          fontColor: 'navajowhite'
+          fontColor: TINY_LIVING.DEFAULT_FONT_COLOR,
         },
         scaleLabel: {
           display: true,
           labelString: 'Solar Radiation (W/m^2)',
           fontSize: 16,
-          fontColor: 'navajowhite',
-          fontFamily: 'sans-serif'
+          fontColor: TINY_LIVING.DEFAULT_FONT_COLOR
         }
       }]
     },
@@ -243,12 +261,12 @@ var temperatureChart = new Chart(ctx, {
       display: true,
       text: '',
       fontSize: 18,
-      fontColor: 'navajowhite',
+      fontColor: TINY_LIVING.DEFAULT_FONT_COLOR
     }
   }
 });
 $(document).ready(function() {
-  InitAWSCredentials()
+  initAWSCredentials()
   queryMinisplitTable(true)
   queryMesonetTable(true)
   $('#refresh-button').on("click", function() {
