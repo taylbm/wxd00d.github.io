@@ -47,9 +47,9 @@ function updateTextData(target) {
     var mesonetCollectionTime = temperatureChart.data.datasets[3].data.slice(-1)[0]['x']
     var latestAirTemp = Math.round(temperatureChart.data.datasets[3].data.slice(-1)[0]['y']) + String.fromCharCode(176) + ' F'
     var latestSolarRadiation = temperatureChart.data.datasets[4].data.slice(-1)[0]['y'] +  ' watts/meter^2'
-    for (instantaneousRadiation in temperatureChart.data.datasets[4].data) {
-      totalDailySolarRadiation += (instantaneousRadiation / 1e3) * (5/60)
-      console.log(totalDailySolarRadiation)
+    var radiationValues = Object.values(temperatureChart.data.datasets[4].data)
+    for (const instantaneousRadiation of radiationValues) {
+      totalDailySolarRadiation += (instantaneousRadiation['y'] / 1e3) * (5/60)
     }
     $('#mesonetCollectionTime').html(mesonetCollectionTime)
     $('#airTemp').html(latestAirTemp)
