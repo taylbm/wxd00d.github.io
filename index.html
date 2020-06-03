@@ -3,11 +3,12 @@
     <head>
         <title>Tiny Living Temperatures</title>
         <link rel="stylesheet" type="text/css" href="semantic/semantic.min.css">
+        <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
         <script
           src="https://code.jquery.com/jquery-3.1.1.min.js"
           integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
-          crossorigin="anonymous">
-        </script>
+          crossorigin="anonymous"></script>
+        <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
         <script src="semantic/semantic.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js"></script>
@@ -25,6 +26,7 @@
             <i class="undo icon"></i>
             Reset Zoom 
           </button>
+          <p style="color:white; margin:1%;display:inline-block;">Select a date: <input type="text" id="date-selection"></p>
           <div class="chart-container" style="position: relative; margin:2%; padding-bottom:10px;">
             <div id="loader" style="top: 50%" class="ui disabled centered inline loader"></div>
             <canvas id="temperatureChart"></canvas>
@@ -64,7 +66,7 @@
         </div>
         <script src="https://sdk.amazonaws.com/js/aws-sdk-2.627.0.min.js"></script>
         <script src="js/chart_config.js"></script>
-        <script src="js/common.js"></script>
+        <script defer src="js/common.js"></script>
     </body>
 </html>
 

@@ -140,17 +140,21 @@ function queryMesonetTable(first) {
         var airTemp = element.air_temperature.N
         var solarRadiation = element.solar_radiation.N
         if (solarRadiation < 0) {
-          TINY_LIVING.mesonetData['air_temperature'].push({'x': new Date(parseFloat(element.collection_timestamp.S, 10) * 1e3), 
-                                                           'y': 'NaN'})
           TINY_LIVING.mesonetData['solar_radiation'].push({'x': new Date(parseFloat(element.collection_timestamp.S, 10) * 1e3),
                                                            'y': 'NaN'})
         }
         else {
-          TINY_LIVING.mesonetData['air_temperature'].push({'x': new Date(parseFloat(element.collection_timestamp.S, 10) * 1e3),
-                                                           'y': cToF(airTemp)})
           TINY_LIVING.mesonetData['solar_radiation'].push({'x': new Date(parseFloat(element.collection_timestamp.S, 10) * 1e3),
                                                            'y': solarRadiation})
         }
+	if (airTemp > 130) {
+          TINY_LIVING.mesonetData['air_temperature'].push({'x': new Date(parseFloat(element.collection_timestamp.S, 10) * 1e3),
+                                                           'y': 'NaN'}) 
+	}
+	else {
+          TINY_LIVING.mesonetData['air_temperature'].push({'x': new Date(parseFloat(element.collection_timestamp.S, 10) * 1e3),
+                                                           'y': cToF(airTemp)})
+	}
       });
       TINY_LIVING.temperatureChart.data.datasets[3].data = TINY_LIVING.mesonetData['air_temperature']
       TINY_LIVING.temperatureChart.data.datasets[4].data = TINY_LIVING.mesonetData['solar_radiation']
@@ -175,4 +179,5 @@ $(document).ready(function() {
   $('#reset-button').on("click", function() {
     TINY_LIVING.temperatureChart.resetZoom();
   });
+  $('#date-selection').datepicker();
 });
