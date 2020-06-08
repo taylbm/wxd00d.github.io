@@ -97,7 +97,7 @@ function queryMinisplitTable(first) {
       data.Items.forEach(function(element, index, array) {
         TINY_LIVING.minisplitData['indoor_temp'].push({'x': new Date(parseFloat(element.collection_timestamp.S, 10) * 1e3),
                                                        'y': cToF(element.indoor_temp.N)})
-        if (element.outdoor_temp.N > 130) {
+        if (parseInt(element.outdoor_temp.N, 10) > 50) {
           TINY_LIVING.minisplitData['outdoor_temp'].push({'x': new Date(parseFloat(element.collection_timestamp.S, 10) * 1e3),
                                                         'y': 'NaN'})
         }
