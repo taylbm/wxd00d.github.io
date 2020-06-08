@@ -99,6 +99,14 @@ function queryMinisplitTable(first) {
                                                        'y': cToF(element.indoor_temp.N)})
         TINY_LIVING.minisplitData['outdoor_temp'].push({'x': new Date(parseFloat(element.collection_timestamp.S, 10) * 1e3),
                                                         'y': cToF(element.outdoor_temp.N)})
+        if (element.outdoor_temp.N > 130) {
+          TINY_LIVING.minisplitData['outdoor_temp'].push({'x': new Date(parseFloat(element.collection_timestamp.S, 10) * 1e3),
+                                                        'y': 'NaN'})
+        }
+        else {
+          TINY_LIVING.minisplitData['outdoor_temp'].push({'x': new Date(parseFloat(element.collection_timestamp.S, 10) * 1e3),
+                                                        'y': cToF(element.outdoor_temp.N)})
+        }
         if (element.hasOwnProperty('power_state')) {
           TINY_LIVING.minisplitData['power_state'].push(element.power_state)
           if (element.power_state.BOOL) { 
@@ -142,19 +150,15 @@ function queryMesonetTable(first) {
         if (solarRadiation < 0) {
           TINY_LIVING.mesonetData['solar_radiation'].push({'x': new Date(parseFloat(element.collection_timestamp.S, 10) * 1e3),
                                                            'y': 'NaN'})
+          TINY_LIVING.mesonetData['air_temperature'].push({'x': new Date(parseFloat(element.collection_timestamp.S, 10) * 1e3),
+                                                           'y': 'NaN'})
         }
         else {
           TINY_LIVING.mesonetData['solar_radiation'].push({'x': new Date(parseFloat(element.collection_timestamp.S, 10) * 1e3),
                                                            'y': solarRadiation})
-        }
-	if (airTemp > 130) {
-          TINY_LIVING.mesonetData['air_temperature'].push({'x': new Date(parseFloat(element.collection_timestamp.S, 10) * 1e3),
-                                                           'y': 'NaN'}) 
-	}
-	else {
           TINY_LIVING.mesonetData['air_temperature'].push({'x': new Date(parseFloat(element.collection_timestamp.S, 10) * 1e3),
                                                            'y': cToF(airTemp)})
-	}
+        }
       });
       TINY_LIVING.temperatureChart.data.datasets[3].data = TINY_LIVING.mesonetData['air_temperature']
       TINY_LIVING.temperatureChart.data.datasets[4].data = TINY_LIVING.mesonetData['solar_radiation']
