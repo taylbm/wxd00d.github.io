@@ -1,6 +1,5 @@
 var TINY_LIVING = {
   temperatureChart: null,
-  now: new Date(),
   minisplitData: {
     'indoor_temp': [],
     'outdoor_temp': [],
@@ -13,13 +12,10 @@ var TINY_LIVING = {
   }
 }
 
-function generateDateRange(first) {
-  var now = first ? TINY_LIVING.now : new Date()
-  var beginDate = first ? new Date() : TINY_LIVING.now
-  if (first) {
-    beginDate.setDate(beginDate.getDate() -1)
-  }
-  console.log(beginDate)
+function generateDateRange() {
+  var now = new Date()
+  var beginDate = new Date()
+  beginDate.setDate(beginDate.getDate() -1)
   var isoDate = now.toISOString().split('T')[0]
   return {'now': now.getTime().toString(), 
           'beginDate': beginDate.getTime().toString(),
@@ -75,20 +71,32 @@ function updateTextData(target) {
   }
 }
 
-function queryMinisplitTable(first) {
+function queryMinisplitTable(dateStr) {
   var temperatureChart = TINY_LIVING.temperatureChart
   $('#loader').addClass('active')
   var ddb = new AWS.DynamoDB({apiVersion: '2012-08-10'});
-  dates = generateDateRange(first)
-  var params = {
-    ExpressionAttributeValues: {
-      ':da': {S: dates['isoDate']},
-      ':ge': {S: dates['beginDate']},
-      ':le': {S: dates['now']}
-    },
-    KeyConditionExpression: 'collection_date = :da AND collection_timestamp BETWEEN :ge AND :le',
-    TableName: 'tiny-living-mini-split'
-  };
+  dates = generateDateRange()
+  if (dateStr) {
+    var dateObj = new Date(dateStr)
+    var params = {
+      ExpressionAttributeValues: {
+        ':da': {S: dateObj.toISOString().split('T')[0]}
+      },
+      KeyConditionExpression: 'collection_date = :da',
+      TableName: 'tiny-living-mini-split'
+    };
+  }
+  else {
+    var params = {
+      ExpressionAttributeValues: {
+        ':da': {S: dates['isoDate']},
+        ':ge': {S: dates['beginDate']},
+        ':le': {S: dates['now']}
+      },
+      KeyConditionExpression: 'collection_date = :da AND collection_timestamp BETWEEN :ge AND :le',
+      TableName: 'tiny-living-mini-split'
+    };
+  }
   ddb.query(params, function(err, data) {
     if (err) {
       console.log("Error", err);
@@ -124,19 +132,31 @@ function queryMinisplitTable(first) {
   });
 }
 
-function queryMesonetTable(first) {
+function queryMesonetTable(dateStr) {
   $('#loader').addClass('active')
   var ddb = new AWS.DynamoDB({apiVersion: '2012-08-10'});
-  dates = generateDateRange(first)
-  var params = {
-    ExpressionAttributeValues: {
-      ':da': {S: dates['isoDate']},
-      ':ge': {S: dates['beginDate']},
-      ':le': {S: dates['now']}
-    },
-    KeyConditionExpression: 'collection_date = :da AND collection_timestamp BETWEEN :ge AND :le',
-    TableName: 'nrmn-mesonet-data'
-  };
+  dates = generateDateRange()
+  if (dateStr) {
+    var dateObj = new Date(dateStr)
+    var params = {
+      ExpressionAttributeValues: {
+        ':da': {S: dateObj.toISOString().split('T')[0]}
+      },
+      KeyConditionExpression: 'collection_date = :da',
+      TableName: 'nrmn-mesonet-data'
+    };
+  }
+  else {
+    var params = {
+      ExpressionAttributeValues: {
+        ':da': {S: dates['isoDate']},
+        ':ge': {S: dates['beginDate']},
+        ':le': {S: dates['now']}
+      },
+      KeyConditionExpression: 'collection_date = :da AND collection_timestamp BETWEEN :ge AND :le',
+      TableName: 'nrmn-mesonet-data'
+    };
+  }
   ddb.query(params, function(err, data) {
     if (err) {
       console.log("Error", err);
@@ -167,19 +187,38 @@ function queryMesonetTable(first) {
     $('#loader').removeClass('active')
   });
 }
+
+function dateChange(dateStr, instance) {
+  TINY_LIVING.mesonetData['air_temperature'] = []
+  TINY_LIVING.mesonetData['solar_radiation'] = []
+  TINY_LIVING.minisplitData['indoor_temp'] = []
+  TINY_LIVING.minisplitData['outdoor_temp'] = []
+  TINY_LIVING.minisplitData['target_temp'] = []
+  TINY_LIVING.minisplitData['power_state'] = []
+  TINY_LIVING.temperatureChart.clear()
+  displayDate = new Date(dateStr)
+  chartTitle[0] = displayDate.toDateString()
+  TINY_LIVING.temperatureChart.options.title.text = chartTitle
+  queryMinisplitTable(dateStr)
+  queryMesonetTable(dateStr)
+}
+
 $(document).ready(function() {
   ctx = $('#temperatureChart')
   TINY_LIVING.temperatureChart = new Chart(ctx, chartConfig);
   TINY_LIVING.temperatureChart.options.title.text = chartTitle;
   initAWSCredentials();
-  queryMinisplitTable(true);
-  queryMesonetTable(true);
+  queryMinisplitTable(false);
+  queryMesonetTable(false);
   $('#refresh-button').on("click", function() {
+    TINY_LIVING.temperatureChart.clear()
     queryMinisplitTable(false);
-    queryMesonetTable(false);
+    queryMesonetTable(false,);
   });
   $('#reset-button').on("click", function() {
     TINY_LIVING.temperatureChart.resetZoom();
   });
-  $('#date-selection').datepicker();
+  $('#date-selection').datepicker({
+    onSelect: dateChange
+  });
 });
