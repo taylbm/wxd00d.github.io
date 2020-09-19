@@ -7,7 +7,7 @@ var TINY_LIVING = {
     'power_state': []
   },
   pwsData: {
-    'outdoor_air_temp': [],
+    'outdoor_air_temperature': [],
     'outdoor_relative_humidity': []
   }
 }
@@ -125,7 +125,7 @@ function queryMinisplitTable(dateStr) {
       TINY_LIVING.temperatureChart.data.datasets[0].data = TINY_LIVING.minisplitData['indoor_temp']
       TINY_LIVING.temperatureChart.data.datasets[1].data = TINY_LIVING.minisplitData['outdoor_temp']
       TINY_LIVING.temperatureChart.update()
-      updateTextData('minisplit')
+      //updateTextData('minisplit')
     }
     $('#loader').addClass('disabled')
     $('#loader').removeClass('active')
@@ -154,7 +154,7 @@ function queryPWSTable(dateStr) {
         ':ge': {S: dates['beginDate']},
         ':le': {S: dates['now']}
       },
-      KeyConditionExpression: 'collection_date = :da AND collection_timestamp BETWEEN :ge AND :le',
+      KeyConditionExpression: 'collection_date = :da AND retrieval_timestamp BETWEEN :ge AND :le',
       TableName: 'KCOLOVEL366-pws-data'
     };
   }

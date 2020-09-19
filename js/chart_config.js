@@ -41,7 +41,7 @@ var chartConfig = {
       {
            label: "Outdoor Relative Humidity (KCOLOVEL366)",
            data: [{}],
-           backgroundColor: "rgb(255, 116, 0)",
+           backgroundColor: "rgb(63, 191, 127)",
            borderColor: "white",
            borderWidth: 0.25,
            yAxisID: "relativeHumidity",
