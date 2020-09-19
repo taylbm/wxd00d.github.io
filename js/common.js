@@ -6,9 +6,9 @@ var TINY_LIVING = {
     'target_temp': [],
     'power_state': []
   },
-  mesonetData: {
-    'air_temperature': [],
-    'solar_radiation': []
+  pwsData: {
+    'outdoor_air_temp': [],
+    'outdoor_relative_humidity': []
   }
 }
 
@@ -132,7 +132,8 @@ function queryMinisplitTable(dateStr) {
   });
 }
 
-function queryMesonetTable(dateStr) {
+
+function queryPWSTable(dateStr) {
   $('#loader').addClass('active')
   var ddb = new AWS.DynamoDB({apiVersion: '2012-08-10'});
   dates = generateDateRange()
@@ -143,7 +144,7 @@ function queryMesonetTable(dateStr) {
         ':da': {S: dateObj.toISOString().split('T')[0]}
       },
       KeyConditionExpression: 'collection_date = :da',
-      TableName: 'nrmn-mesonet-data'
+      TableName: 'KCOLOVEL366-pws-data'
     };
   }
   else {
@@ -154,34 +155,26 @@ function queryMesonetTable(dateStr) {
         ':le': {S: dates['now']}
       },
       KeyConditionExpression: 'collection_date = :da AND collection_timestamp BETWEEN :ge AND :le',
-      TableName: 'nrmn-mesonet-data'
+      TableName: 'KCOLOVEL366-pws-data'
     };
   }
   ddb.query(params, function(err, data) {
     if (err) {
       console.log("Error", err);
-    } 
+    }
     else {
       data.Items.forEach(function(element, index, array) {
-        var airTemp = element.air_temperature.N
-        var solarRadiation = element.solar_radiation.N
-        if (solarRadiation < 0) {
-          TINY_LIVING.mesonetData['solar_radiation'].push({'x': new Date(parseFloat(element.collection_timestamp.S, 10) * 1e3),
-                                                           'y': 'NaN'})
-          TINY_LIVING.mesonetData['air_temperature'].push({'x': new Date(parseFloat(element.collection_timestamp.S, 10) * 1e3),
-                                                           'y': 'NaN'})
-        }
-        else {
-          TINY_LIVING.mesonetData['solar_radiation'].push({'x': new Date(parseFloat(element.collection_timestamp.S, 10) * 1e3),
-                                                           'y': solarRadiation})
-          TINY_LIVING.mesonetData['air_temperature'].push({'x': new Date(parseFloat(element.collection_timestamp.S, 10) * 1e3),
-                                                           'y': cToF(airTemp)})
-        }
+        var outdoorAirTemp = element.outdoor_air_temperature.N
+        var outdoorRelativeHumidity = element.outdoor_relative_humidity.N
+        TINY_LIVING.pwsData['outdoor_air_temperature'].push({'x': new Date(parseFloat(element.collection_timestamp.S, 10) * 1e3),
+                                                           'y': outdoorAirTemp})
+        TINY_LIVING.pwsData['outdoor_relative_humidity'].push({'x': new Date(parseFloat(element.collection_timestamp.S, 10) * 1e3),
+                                                           'y': outdoorRelativeHumidity})
       });
-      TINY_LIVING.temperatureChart.data.datasets[3].data = TINY_LIVING.mesonetData['air_temperature']
-      TINY_LIVING.temperatureChart.data.datasets[4].data = TINY_LIVING.mesonetData['solar_radiation']
+      TINY_LIVING.temperatureChart.data.datasets[3].data = TINY_LIVING.pwsData['outdoor_air_temperature']
+      TINY_LIVING.temperatureChart.data.datasets[4].data = TINY_LIVING.pwsData['outdoor_relative_humidity']
       TINY_LIVING.temperatureChart.update()
-      updateTextData('mesonet')
+      //updateTextData('mesonet')
     }
     $('#loader').addClass('disabled')
     $('#loader').removeClass('active')
@@ -189,8 +182,8 @@ function queryMesonetTable(dateStr) {
 }
 
 function dateChange(dateStr, instance) {
-  TINY_LIVING.mesonetData['air_temperature'] = []
-  TINY_LIVING.mesonetData['solar_radiation'] = []
+  TINY_LIVING.pwsData['outdoor_air_temperature'] = []
+  TINY_LIVING.pwsData['outdoor_relative_humidity'] = []
   TINY_LIVING.minisplitData['indoor_temp'] = []
   TINY_LIVING.minisplitData['outdoor_temp'] = []
   TINY_LIVING.minisplitData['target_temp'] = []
@@ -200,7 +193,7 @@ function dateChange(dateStr, instance) {
   chartTitle[0] = displayDate.toDateString()
   TINY_LIVING.temperatureChart.options.title.text = chartTitle
   queryMinisplitTable(dateStr)
-  queryMesonetTable(dateStr)
+  queryPWSTable(dateStr)
 }
 
 $(document).ready(function() {
@@ -209,11 +202,11 @@ $(document).ready(function() {
   TINY_LIVING.temperatureChart.options.title.text = chartTitle;
   initAWSCredentials();
   queryMinisplitTable(false);
-  queryMesonetTable(false);
+  queryPWSTable(false);
   $('#refresh-button').on("click", function() {
     TINY_LIVING.temperatureChart.clear()
     queryMinisplitTable(false);
-    queryMesonetTable(false,);
+    queryPWSTable(false);
   });
   $('#reset-button').on("click", function() {
     TINY_LIVING.temperatureChart.resetZoom();

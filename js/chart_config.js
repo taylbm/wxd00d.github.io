@@ -31,7 +31,7 @@ var chartConfig = {
 
       },
       {
-           label: "Air Temperature (NRMN)",
+           label: "Outdoor Temperature (KCOLOVEL366)",
            data: [{}],
            backgroundColor: "rgb(255, 0, 0)",
            borderColor: "white",
@@ -39,12 +39,12 @@ var chartConfig = {
            yAxisID: "temperature"
       },
       {
-           label: "Solar Radiation (NRMN)",
+           label: "Outdoor Relative Humidity (KCOLOVEL366)",
            data: [{}],
            backgroundColor: "rgb(255, 116, 0)",
            borderColor: "white",
            borderWidth: 0.25,
-           yAxisID: "solarRadiation",
+           yAxisID: "relativeHumidity",
            type: "line",
            pointStyle: "rectRounded"
 
@@ -99,13 +99,13 @@ var chartConfig = {
          type: "linear",
          display: true,
          position: "right",
-         id: "solarRadiation",
+         id: "relativeHumidity",
          ticks: {
           "fontColor": "navajowhite"
         },
          scaleLabel: {
            display: true,
-           labelString: "Solar Radiation (W/m^2)",
+           labelString: "Relative Humidity (%)",
            fontSize: 16,
            fontColor: "navajowhite"
         }
