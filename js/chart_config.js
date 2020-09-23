@@ -1,4 +1,4 @@
-var chartTitle = [new Date().toDateString(), 'Real-Time Tiny Living Mini-Split Temperatures (TINY)', 'OK Mesonet Data from Norman (NRMN)']
+var chartTitle = [new Date().toDateString(), 'Real-Time Tiny Living Mini-Split Temperatures (TINY)', 'Big T Tiny (KCOLOVEL366)']
 var chartConfig = {
     type: "scatter",
     data: {

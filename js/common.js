@@ -38,19 +38,11 @@ function cToF(c_value){
 
 function updateTextData(target) {
   var temperatureChart = TINY_LIVING.temperatureChart
-  var totalDailySolarRadiation = 0
-  if (target == 'mesonet') {
-    var mesonetCollectionTime = temperatureChart.data.datasets[3].data.slice(-1)[0]['x']
+  if (target == 'pws') {
+    var pwsCollectionTime = temperatureChart.data.datasets[3].data.slice(-1)[0]['x']
     var latestAirTemp = Math.round(temperatureChart.data.datasets[3].data.slice(-1)[0]['y']) + String.fromCharCode(176) + ' F'
-    var latestSolarRadiation = temperatureChart.data.datasets[4].data.slice(-1)[0]['y'] +  ' watts/meter^2'
-    var radiationValues = Object.values(temperatureChart.data.datasets[4].data)
-    for (const instantaneousRadiation of radiationValues) {
-      totalDailySolarRadiation += (instantaneousRadiation['y'] / 1e3) * (5/60)
-    }
-    $('#mesonetCollectionTime').html(mesonetCollectionTime)
+    $('#pwsCollectionTime').html(pwsCollectionTime)
     $('#airTemp').html(latestAirTemp)
-    $('#solarRadiation').html(latestSolarRadiation)
-    $('#totalDailySolarRadiation').html(Math.round(totalDailySolarRadiation * 100)/100 + ' kilowatt-Hours')
   }
   else {
     var minisplitCollectionTime = temperatureChart.data.datasets[0].data.slice(-1)[0]['x']
@@ -125,7 +117,7 @@ function queryMinisplitTable(dateStr) {
       TINY_LIVING.temperatureChart.data.datasets[0].data = TINY_LIVING.minisplitData['indoor_temp']
       TINY_LIVING.temperatureChart.data.datasets[1].data = TINY_LIVING.minisplitData['outdoor_temp']
       TINY_LIVING.temperatureChart.update()
-      //updateTextData('minisplit')
+      updateTextData('minisplit')
     }
     $('#loader').addClass('disabled')
     $('#loader').removeClass('active')
@@ -174,7 +166,7 @@ function queryPWSTable(dateStr) {
       TINY_LIVING.temperatureChart.data.datasets[3].data = TINY_LIVING.pwsData['outdoor_air_temperature']
       TINY_LIVING.temperatureChart.data.datasets[4].data = TINY_LIVING.pwsData['outdoor_relative_humidity']
       TINY_LIVING.temperatureChart.update()
-      //updateTextData('mesonet')
+      updateTextData('pws')
     }
     $('#loader').addClass('disabled')
     $('#loader').removeClass('active')
